@@ -6,7 +6,7 @@ import {
   setNotification,
 } from "../../store/notificationSlice";
 import { useDispatch } from "react-redux";
-import { fetchTasks } from "../../store/tasksSlice";
+import { deleteTask, fetchTasks } from "../../store/tasksSlice";
 import { useEffect } from "react";
 
 function TaskList() {
@@ -23,6 +23,23 @@ function TaskList() {
       navigate("/signin");
     }
   }, [dispatch, navigate]);
+
+  const handleDelete = (id) => {
+    deleteTask(id);
+
+    dispatch(
+      setNotification({
+        message: "Task deleted successfully",
+        type: "success",
+      })
+    );
+
+    setTimeout(() => {
+      dispatch(clearNotification());
+    }, 3000);
+
+    dispatch(fetchTasks());
+  };
 
   if (status === "loading") return <div>Loading...</div>;
   if (status === "failed") return <div>Error loading tasks</div>;
@@ -73,7 +90,10 @@ function TaskList() {
             <Link href="#" className="btn btn-primary">
               Edit
             </Link>
-            <Button onClick={console.log} className="btn btn-danger">
+            <Button
+              onClick={() => handleDelete(task._id)}
+              className="btn btn-danger"
+            >
               Delete
             </Button>
           </div>
