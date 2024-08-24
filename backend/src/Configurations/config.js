@@ -6,7 +6,7 @@ dotenv.config()
 module.exports = {
     port: process.env.PORT,
     DBuri: "mongodb://localhost:27017/TASK_MANAGEMENT",
-    secretkey: process.env.SECRET_KEY,
+    secretkey: process.env.SECRET_KEY || "secret",
     jwtExpiresForAcessToken: "3d",
     jwtExpiresForRefreshToken: "5d"
 } 
