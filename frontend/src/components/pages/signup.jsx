@@ -1,5 +1,6 @@
 import { useFormik } from "formik";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const validate = (values) => {
   const errors = {};
@@ -154,7 +155,7 @@ const SignUp = () => {
           ) : null}
         </div>
         <p className="mt-3 text-center">
-          Already have an account? <a href="/signin">Sign in</a>
+          Already have an account? <Link to="/signin">Sign in</Link>
         </p>
 
         <button type="submit" className="btn btn-primary">
