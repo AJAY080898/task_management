@@ -10,8 +10,15 @@ const api = axios.create({
 });
 
 export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
-  const response = await api.get("/task");
-  return response.data.data;
+  let tasks;
+  try {
+    const response = await api.get("/task");
+    tasks = response.data.data;
+  } catch (error) {
+    console.error("Error fetching tasks", error);
+    tasks = [];
+  }
+  return tasks;
 });
 
 export const addTask = createAsyncThunk("tasks/addTask", async (task) => {
@@ -27,15 +34,18 @@ export const fetchTaskDetails = createAsyncThunk(
   }
 );
 
-export const deleteTask = createAsyncThunk("tasks/deleteTask", async (id) => {
-  await api.delete(`/task/${id}`);
+export const deleteTask = createAsyncThunk("tasks/deleteTask", (id) => {
+  api.delete(`/task/${id}`);
   return id;
 });
 
-export const updateTask = createAsyncThunk("tasks/updateTask", async (task) => {
-  const response = await api.put(`/task/${task.id}`, task);
-  return response.data;
-});
+export const updateTask = createAsyncThunk(
+  "tasks/updateTask",
+  async ({ id, task }) => {
+    const response = await api.put(`/task/${id}`, task);
+    return response.data;
+  }
+);
 
 export const searchTasks = createAsyncThunk(
   "tasks/searchTasks",
@@ -50,13 +60,12 @@ export const tasksSlice = createSlice({
   initialState: {
     items: [],
     status: "idle",
+    query: "",
     error: null,
   },
   reducers: {
     searchTasks: (state, action) => {
-      state.items = state.items.filter((task) =>
-        task.title.toLowerCase().includes(action.payload.toLowerCase())
-      );
+      state.query = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -86,11 +95,11 @@ export const tasksSlice = createSlice({
         }
       })
       .addCase(deleteTask.fulfilled, (state, action) => {
-        state.items = state.items.filter((task) => task.id !== action.payload);
+        state.items = state.items.filter((task) => task._id !== action.payload);
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         const index = state.items.findIndex(
-          (task) => task.id === action.payload.id
+          (task) => task._id === action.payload._id
         );
         state.items[index] = action.payload;
       })

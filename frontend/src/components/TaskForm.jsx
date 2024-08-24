@@ -1,20 +1,28 @@
 import { useDispatch } from "react-redux";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import { Form as BootstrapForm, Button } from "react-bootstrap";
 import { addTask } from "../store/tasksSlice";
 import { clearNotification, setNotification } from "../store/notificationSlice";
-import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { useFormik } from "formik";
+import { useNavigate } from "react-router-dom";
 
-const TaskSchema = Yup.object().shape({
-  title: Yup.string().required("Required"),
-  description: Yup.string(),
-  dueDate: Yup.date(),
-  status: Yup.string().oneOf(["PENDING", "IN_PROGRESS", "COMPLETED"]),
-});
+const validate = (values) => {
+  const errors = {};
 
-function TaskForm() {
+  if (!values.title) {
+    errors.title = "Required";
+  }
+
+  if (!values.description) {
+    errors.description = "Required";
+  }
+
+  return errors;
+};
+
+const TaskForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -25,74 +33,91 @@ function TaskForm() {
     }
   }, [navigate]);
 
+  const formik = useFormik({
+    initialValues: {
+      title: "",
+      description: "",
+      dueDate: "",
+      status: "PENDING",
+    },
+    validate,
+    onSubmit: (values) => {
+      dispatch(addTask(values));
+      dispatch(
+        setNotification({
+          message: "Task created successfully",
+          type: "success",
+        })
+      );
+      navigate("/");
+
+      setTimeout(() => dispatch(clearNotification()), 5000);
+    },
+  });
+
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate("/signin");
+    }
+  }, []);
+
   return (
-    <Formik
-      initialValues={{
-        title: "",
-        description: "",
-        dueDate: "",
-        status: "PENDING",
-      }}
-      validationSchema={TaskSchema}
-      onSubmit={(values, { setSubmitting }) => {
-        dispatch(addTask(values));
-        dispatch(
-          setNotification({
-            message: "Task created successfully",
-            type: "success",
-          })
-        );
-        navigate("/");
+    <div className="d-flex justify-content-center align-items-center mt-5 flex-column min-vh-100">
+      <h1 className="h3 mb-3 font-weight-normal w-100 text-center">
+        Create Task
+      </h1>
+      <form onSubmit={formik.handleSubmit} className="form-signin col-md-6">
+        <div className="form-group mb-3">
+          <label htmlFor="title">Title</label>
+          <input
+            id="title"
+            name="title"
+            type="title"
+            className={`form-control ${
+              formik.errors.title ? "is-invalid" : ""
+            }`}
+            onChange={formik.handleChange}
+            value={formik.values.title}
+          />
+          {formik.errors.title ? (
+            <small className="invalid-feedback">{formik.errors.title}</small>
+          ) : null}
+        </div>
 
-        setTimeout(() => dispatch(clearNotification()), 5000);
-        setSubmitting(false);
-      }}
-    >
-      {({ isSubmitting, errors, touched }) => (
-        <Form>
-          <BootstrapForm.Group>
-            <BootstrapForm.Label>Title</BootstrapForm.Label>
-            <Field
-              name="title"
-              as={BootstrapForm.Control}
-              isInvalid={touched.title && errors.title}
+        <div className="form-group mb-3">
+          <label htmlFor="description">Description</label>
+          <input
+            id="description"
+            name="description"
+            type="description"
+            className={`form-control ${
+              formik.errors.description ? "is-invalid" : ""
+            }`}
+            onChange={formik.handleChange}
+            value={formik.values.description}
+          />
+          {formik.errors.description ? (
+            <small className="invalid-feedback">
+              {formik.errors.description}
+            </small>
+          ) : null}
+        </div>
+
+        <div className="form-group mb-3">
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              label="Basic date time picker"
+              onChange={(date) => formik.setFieldValue("dueDate", date.$d)}
             />
-            <BootstrapForm.Control.Feedback type="invalid">
-              {errors.title}
-            </BootstrapForm.Control.Feedback>
-          </BootstrapForm.Group>
+          </LocalizationProvider>
+        </div>
 
-          <BootstrapForm.Group>
-            <BootstrapForm.Label>Description</BootstrapForm.Label>
-            <Field name="description" as={BootstrapForm.Control} />
-          </BootstrapForm.Group>
-
-          <BootstrapForm.Group>
-            <BootstrapForm.Label>Due Date</BootstrapForm.Label>
-            <Field name="dueDate" type="date" as={BootstrapForm.Control} />
-          </BootstrapForm.Group>
-
-          <BootstrapForm.Group>
-            <BootstrapForm.Label>Status</BootstrapForm.Label>
-            <Field name="status" as="select" className="form-control">
-              <option value="PENDING">Pending</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
-            </Field>
-          </BootstrapForm.Group>
-
-          <Button
-            variant="primary"
-            type="submit"
-            disabled={isSubmitting}
-            className="mt-3"
-          >
-            Create Task
-          </Button>
-        </Form>
-      )}
-    </Formik>
+        <button type="submit" className="btn btn-primary">
+          Create Task
+        </button>
+      </form>
+    </div>
   );
-}
+};
 
 export default TaskForm;
