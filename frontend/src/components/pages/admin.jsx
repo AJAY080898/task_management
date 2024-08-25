@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Layout from "../Layout";
+import { useNavigate } from "react-router-dom";
+import { parseJwt } from "../../utils/helper";
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
 
   const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -16,7 +20,17 @@ const UserList = () => {
   });
 
   useEffect(() => {
-    fetchUsers();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/signin");
+    } else {
+      const decodedToken = parseJwt(token);
+      if (decodedToken.role?.toLowerCase() !== "admin") {
+        navigate("/");
+      } else {
+        fetchUsers();
+      }
+    }
   }, []);
 
   const fetchUsers = async () => {

@@ -8,6 +8,7 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
 import Layout from "./Layout";
+import { parseJwt } from "../utils/helper";
 
 const validate = (values) => {
   const errors = {};
@@ -26,13 +27,6 @@ const validate = (values) => {
 const TaskForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/signin");
-    }
-  }, [navigate]);
 
   const formik = useFormik({
     initialValues: {
@@ -57,8 +51,15 @@ const TaskForm = () => {
   });
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       navigate("/signin");
+    } else {
+      const decodedToken = parseJwt(token);
+
+      if (decodedToken.role?.toLowerCase() !== "admin") {
+        navigate("/");
+      }
     }
   }, []);
 

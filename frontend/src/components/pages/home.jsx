@@ -7,8 +7,9 @@ import {
 } from "../../store/notificationSlice";
 import { useDispatch } from "react-redux";
 import { deleteTask, fetchTasks } from "../../store/tasksSlice";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../Layout";
+import { parseJwt } from "../../utils/helper";
 
 function TaskList() {
   const tasks = useSelector((state) => state.tasks.items);
@@ -16,11 +17,16 @@ function TaskList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const filterQuery = useSelector((state) => state.tasks.query) || "";
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       dispatch(fetchTasks());
+      const decodedToken = parseJwt(token);
+      if (decodedToken.role?.toLowerCase() === "admin") {
+        setIsAdmin(true);
+      }
     } else {
       navigate("/signin");
     }
@@ -45,10 +51,14 @@ function TaskList() {
   if (status === "failed") return <div>Error loading tasks</div>;
 
   setInterval(() => {
+    const TASK_OVERDUE_THRESHOLD = parseInt(
+      import.meta.env.VITE_TASK_OVERDUE_THRESHOLD || "30"
+    );
     const overdueTasks = tasks.filter(
       (task) =>
         task.status !== "COMPLETED" &&
-        new Date(task.dueDate) < new Date(Date.now() + 30 * 60000)
+        new Date(task.dueDate) <
+          new Date(Date.now() + TASK_OVERDUE_THRESHOLD * 60000)
     );
 
     if (overdueTasks.length > 0) {
@@ -70,9 +80,11 @@ function TaskList() {
       <Layout>
         <Container>
           No tasks found &nbsp;
-          <Link to="/new" className="link-primary">
-            Add Task
-          </Link>
+          {isAdmin && (
+            <Link to="/new" className="link-primary">
+              Add Task
+            </Link>
+          )}
         </Container>
       </Layout>
     );
@@ -118,6 +130,7 @@ function TaskList() {
                     <Button
                       onClick={() => handleDelete(task._id)}
                       className="btn btn-danger"
+                      disabled={!isAdmin}
                     >
                       Delete
                     </Button>

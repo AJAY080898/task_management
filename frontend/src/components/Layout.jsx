@@ -35,12 +35,13 @@ const Layout = (props) => {
               <SearchBar />
             </Container>
           </Navbar>
-          <Container className="d-flex justify-content-end mb-3">
-            <Button onClick={handleLogout}>Logout</Button>
+          <Container>
+            <div className="d-flex justify-content-end mb-3">
+              <Button onClick={handleLogout}>Logout</Button>
+            </div>
+            <Notification />
+            {props.children}
           </Container>
-          <Notification />
-
-          {props.children}
         </>
       )}
     </div>

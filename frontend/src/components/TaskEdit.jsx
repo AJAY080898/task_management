@@ -1,14 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import { fetchTaskDetails, deleteTask, updateTask } from "../store/tasksSlice";
+import { updateTask } from "../store/tasksSlice";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Form as BootstrapForm, Button } from "react-bootstrap";
-import { addTask } from "../store/tasksSlice";
 import { clearNotification, setNotification } from "../store/notificationSlice";
 import Layout from "./Layout";
+import { parseJwt } from "../utils/helper";
 
 const TaskSchema = Yup.object().shape({
   title: Yup.string().required("Required"),
@@ -22,6 +22,8 @@ function TaskDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const task = useSelector((state) => {
     return state.tasks.items.find((t) => t._id == id);
   });
@@ -30,9 +32,17 @@ function TaskDetails() {
 
   useEffect(() => {
     if (!task) {
-      dispatch(fetchTaskDetails(id));
+      navigate("/");
     }
-  }, [dispatch, id, task]);
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedToken = parseJwt(token);
+      if (decodedToken.role?.toLowerCase() === "admin") {
+        setIsAdmin(true);
+      }
+    }
+  }, []);
 
   if (status === "loading") return <div>Loading...</div>;
   if (status === "failed") return <div>Error loading task details</div>;
@@ -66,11 +76,19 @@ function TaskDetails() {
           <Form>
             <BootstrapForm.Group>
               <BootstrapForm.Label>Title</BootstrapForm.Label>
-              <Field
-                name="title"
-                as={BootstrapForm.Control}
-                isInvalid={touched.title && errors.title}
-              />
+              {isAdmin ? (
+                <Field
+                  name="title"
+                  as={BootstrapForm.Control}
+                  isInvalid={touched.title && errors.title}
+                />
+              ) : (
+                <BootstrapForm.Control
+                  plaintext
+                  readOnly
+                  defaultValue={task.title}
+                />
+              )}
               <BootstrapForm.Control.Feedback type="invalid">
                 {errors.title}
               </BootstrapForm.Control.Feedback>
@@ -78,7 +96,19 @@ function TaskDetails() {
 
             <BootstrapForm.Group>
               <BootstrapForm.Label>Description</BootstrapForm.Label>
-              <Field name="description" as={BootstrapForm.Control} />
+              {isAdmin ? (
+                <Field
+                  name="description"
+                  as={BootstrapForm.Control}
+                  isInvalid={touched.description && errors.description}
+                />
+              ) : (
+                <BootstrapForm.Control
+                  plaintext
+                  readOnly
+                  defaultValue={task.description}
+                />
+              )}
             </BootstrapForm.Group>
 
             <BootstrapForm.Group>
