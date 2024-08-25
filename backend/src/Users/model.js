@@ -9,8 +9,9 @@ const UserModel = mongoose.model('User',new mongoose.Schema({
     },
     role:{
         type:String,
-        enum:['admin','user'],
-        default:'user'
+        enum:['ADMIN','USER'],
+        required:true,
+        default:'USER'
     }
     ,
     email:{

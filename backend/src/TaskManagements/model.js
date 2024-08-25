@@ -4,11 +4,6 @@ const TaskModel = mongoose.model(
   "Task",
   new mongoose.Schema(
     {
-      userId: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-        ref: "User",
-      },
       title: {
         type: String,
         minlenght: 3,

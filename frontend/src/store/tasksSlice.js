@@ -1,18 +1,21 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  headers: {
-    Authorization: "Bearer " + localStorage.getItem("token"),
-    "Content-Type": "application/json",
-  },
-});
+const api = () => {
+  return axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+      "Content-Type": "application/json",
+    },
+  });
+};
 
 export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
   let tasks;
   try {
-    const response = await api.get("/task");
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const response = await api().get("/task");
     tasks = response.data.data;
   } catch (error) {
     console.error("Error fetching tasks", error);
@@ -22,27 +25,27 @@ export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
 });
 
 export const addTask = createAsyncThunk("tasks/addTask", async (task) => {
-  const response = await api.post("/task", task);
+  const response = await api().post("/task", task);
   return response.data;
 });
 
 export const fetchTaskDetails = createAsyncThunk(
   "tasks/fetchTaskDetails",
   async (id) => {
-    const response = await api.get(`/task/${id}`);
+    const response = await api().get(`/task/${id}`);
     return response.data;
   }
 );
 
 export const deleteTask = createAsyncThunk("tasks/deleteTask", (id) => {
-  api.delete(`/task/${id}`);
+  api().delete(`/task/${id}`);
   return id;
 });
 
 export const updateTask = createAsyncThunk(
   "tasks/updateTask",
   async ({ id, task }) => {
-    const response = await api.put(`/task/${id}`, task);
+    const response = await api().put(`/task/${id}`, task);
     return response.data;
   }
 );
@@ -50,7 +53,7 @@ export const updateTask = createAsyncThunk(
 export const searchTasks = createAsyncThunk(
   "tasks/searchTasks",
   async (query) => {
-    const response = await api.get(`/task?search=${query}`);
+    const response = await api().get(`/task?search=${query}`);
     return response.data.data;
   }
 );

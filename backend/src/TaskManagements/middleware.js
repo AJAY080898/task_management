@@ -5,7 +5,7 @@ const createTaskInputValidation = (req, res, next) => {
     title: Joi.string().required(),
     description: Joi.string().required(),
     dueDate: Joi.date().required(),
-    status: Joi.string(),
+    status: Joi.string().valid("PENDING", "COMPLETED", "IN_PROGRESS"),
   });
 
   const validate = createTaskSchema.validate(req.body);

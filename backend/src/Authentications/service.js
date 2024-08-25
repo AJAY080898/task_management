@@ -17,21 +17,28 @@ const loginAccount = async (req) => {
 
 	if (!verifyPassword) throw new Error("Invalid password");
 
-	const tokenId =new mongoose.Types.ObjectId();
+	const { accessToken, refreshToken } = await getAccesstoken(existUser)
 
-	const accessToken = jwt.sign({ id: existUser._id, tokenId, type: "access-token" }, CONFIG.secretkey, { expiresIn: CONFIG.jwtExpiresForAcessToken });
+	return { message: "LOGGED IN ", data: { accessToken, refreshToken } }
+}
 
-	const refreshToken = jwt.sign({ id: existUser._id, tokenId, type: "refresh-token" }, CONFIG.secretkey, { expiresIn: CONFIG.jwtExpiresForRefreshToken });
+const getAccesstoken = async (userData) => {
+
+	const tokenId = new mongoose.Types.ObjectId();
+
+	const accessToken = jwt.sign({ id: userData._id, role: userData.role, tokenId, type: "access-token" }, CONFIG.secretkey, { expiresIn: CONFIG.jwtExpiresForAcessToken });
+
+	const refreshToken = jwt.sign({ id: userData._id, role: userData.role, tokenId, type: "refresh-token" }, CONFIG.secretkey, { expiresIn: CONFIG.jwtExpiresForRefreshToken });
 
 	const authAcessTokenData = {
-		userId: existUser._id,
+		userId: userData._id,
 		tokenId,
 		token: accessToken,
 		type: "access-token"
 	}
 
 	const authRefreshTokenData = {
-		userId: existUser._id,
+		userId: userData._id,
 		tokenId,
 		token: refreshToken,
 		type: "refresh-token"
@@ -39,7 +46,7 @@ const loginAccount = async (req) => {
 
 	await AuthenticationModel.insertMany([authAcessTokenData, authRefreshTokenData]);
 
-	return { message: "LOGGED IN ", accessToken, refreshToken }
+	return { accessToken, refreshToken }
 }
 
 const logoutAccount = async (req) => {
@@ -53,5 +60,6 @@ const logoutAccount = async (req) => {
 
 module.exports = {
 	loginAccount,
-	logoutAccount
+	logoutAccount,
+	getAccesstoken
 }

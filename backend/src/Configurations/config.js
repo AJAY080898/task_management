@@ -1,12 +1,11 @@
-const dotenv = require('dotenv')
+const dotenv = require("dotenv");
 
-dotenv.config()
-  
+dotenv.config();
 
 module.exports = {
-    port: process.env.PORT,
-    DBuri: "mongodb://localhost:27017/TASK_MANAGEMENT",
-    secretkey: process.env.SECRET_KEY || "secret",
-    jwtExpiresForAcessToken: "3d",
-    jwtExpiresForRefreshToken: "5d"
-} 
+  port: process.env.PORT,
+  DBuri: process.env.DB_URI,
+  secretkey: process.env.SECRET_KEY || "secret",
+  jwtExpiresForAcessToken: "3d",
+  jwtExpiresForRefreshToken: "5d",
+};

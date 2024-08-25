@@ -3,7 +3,6 @@ const TaskModel = require('./model');
 const createTask = async (req) => {
 
 	const taskData = {
-		userId : req.user.id,
 		title: req.body.title,
 		description: req.body.description,
 		dueDate: req.body.dueDate,
@@ -12,49 +11,63 @@ const createTask = async (req) => {
 
 	await TaskModel(taskData).save();
 
-	return { message : "Task created successfully" }
+	return { message: "Task created successfully" }
 }
 
 const getTaskList = async (req) => {
-	const user = req.user;
 
-	const userTasks = await TaskModel.find({userId:user.id}).lean();
+	let userTasks = [];
+	
 
-	return {message:"success", data: userTasks };
+	if(req.user.role === "ADMIN") {
+
+	 userTasks = await TaskModel.find({}).lean();
+
+	}
+
+	return { message: "success", data: userTasks };
 }
 
-const updateTask = async (req, res) => {
-	const user = req.user;
+const getTaskById = async (req) => {
 
 	const { taskId } = req.params;
 
-	const userTask = await TaskModel.findOne({_id:taskId,userId:user.id,}).lean();
+	const userTask = await TaskModel.find({ _id: taskId }).lean();
 
-	if(!userTask) throw new Error("Task not exist")
+	if (!userTask) throw new Error("Task not exist");
+
+	return { message: "success", data: userTask };
+}
+
+const updateTask = async (req, res) => {
+
+	const { taskId } = req.params;
+
+	const userTask = await TaskModel.findOne({ _id: taskId }).lean();
+
+	if (!userTask) throw new Error("Task not exist");
 
 	const updateTaskData = {
-		userId : req.user.id,
 		title: req.body.title,
 		description: req.body.description,
 		dueDate: req.body.dueDate,
 		status: req.body.status
 	}
 
-	 await TaskModel.findOneAndUpdate({_id:taskId,userId:user.id,},updateTaskData).lean();
+	await TaskModel.findOneAndUpdate({ _id: taskId }, updateTaskData).lean();
 
 	return { data: "Updated successfully" };
 }
 
 const deleteTask = async (req, res) => {
-	const user = req.user;
 
 	const { taskId } = req.params;
 
-	const userTask = await TaskModel.findOne({_id:taskId,userId:user.id,}).lean();
+	const userTask = await TaskModel.findOne({ _id: taskId, }).lean();
 
-	if(!userTask) throw new Error("Task not exist")
+	if (!userTask) throw new Error("Task not exist")
 
-	await TaskModel.findOneAndDelete({_id:taskId}).lean();
+	await TaskModel.findOneAndDelete({ _id: taskId }).lean();
 
 	return { data: "Deleted successfully" };
 }
@@ -63,5 +76,6 @@ module.exports = {
 	createTask,
 	getTaskList,
 	updateTask,
+	getTaskById,
 	deleteTask
 }

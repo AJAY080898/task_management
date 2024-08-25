@@ -1,11 +1,11 @@
 const express = require("express");
 const taskService = require("./service");
 const { createTaskInputValidation, updateTaskInputValidation } = require("./middleware");
-const { authorizeRoute } = require("../Authorize/authorize");
+const { authorizeRoute, isAdminUser } = require("../Authorize/authorize");
 const router = express.Router();
 
 
-router.post('/', [authorizeRoute, createTaskInputValidation], async (req, res, next) => {
+router.post('/', [authorizeRoute, isAdminUser, createTaskInputValidation], async (req, res, next) => {
 	try {
 		const result = await taskService.createTask(req, res)
 		return res.status(201).send(result)
@@ -25,6 +25,16 @@ router.get('/', [authorizeRoute], async (req, res, next) => {
 	}
 });
 
+router.get('/:taskId', [authorizeRoute], async (req, res, next) => {
+	try {
+		const result = await taskService.getTaskById(req)
+		 return res.status(200).send(result)
+	} catch (error) {
+		next(error)
+	}
+
+});
+
 router.put('/:taskId', [authorizeRoute, updateTaskInputValidation], async (req, res, next) => {
 	try {
 		const result = await taskService.updateTask(req)
@@ -36,7 +46,7 @@ router.put('/:taskId', [authorizeRoute, updateTaskInputValidation], async (req, 
 
 });
 
-router.delete('/:taskId', [authorizeRoute], async (req, res, next) => {
+router.delete('/:taskId', [authorizeRoute,isAdminUser], async (req, res, next) => {
 	try {
 		const result = await taskService.deleteTask(req);
 		return res.status(200).send(result)
