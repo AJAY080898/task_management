@@ -127,13 +127,14 @@ function TaskList() {
                     <Link to={"/task/" + task._id} className="btn btn-primary">
                       Edit
                     </Link>
-                    <Button
-                      onClick={() => handleDelete(task._id)}
-                      className="btn btn-danger"
-                      disabled={!isAdmin}
-                    >
-                      Delete
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        onClick={() => handleDelete(task._id)}
+                        className="btn btn-danger"
+                      >
+                        Delete
+                      </Button>
+                    )}
                   </div>
                 </div>
               </ListGroup.Item>

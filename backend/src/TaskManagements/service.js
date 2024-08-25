@@ -1,81 +1,69 @@
-const TaskModel = require('./model');
+const TaskModel = require("./model");
 
 const createTask = async (req) => {
+  const taskData = {
+    title: req.body.title,
+    description: req.body.description,
+    dueDate: req.body.dueDate,
+    status: "PENDING",
+  };
 
-	const taskData = {
-		title: req.body.title,
-		description: req.body.description,
-		dueDate: req.body.dueDate,
-		status: "PENDING"
-	}
+  await TaskModel(taskData).save();
 
-	await TaskModel(taskData).save();
-
-	return { message: "Task created successfully" }
-}
+  return { message: "Task created successfully" };
+};
 
 const getTaskList = async (req) => {
+  const userTasks = await TaskModel.find({}).lean();
 
-	let userTasks = [];
-	
-
-	if(req.user.role === "ADMIN") {
-
-	 userTasks = await TaskModel.find({}).lean();
-
-	}
-
-	return { message: "success", data: userTasks };
-}
+  return { message: "success", data: userTasks };
+};
 
 const getTaskById = async (req) => {
+  const { taskId } = req.params;
 
-	const { taskId } = req.params;
+  const userTask = await TaskModel.find({ _id: taskId }).lean();
 
-	const userTask = await TaskModel.find({ _id: taskId }).lean();
+  if (!userTask) throw new Error("Task not exist");
 
-	if (!userTask) throw new Error("Task not exist");
-
-	return { message: "success", data: userTask };
-}
+  return { message: "success", data: userTask };
+};
 
 const updateTask = async (req, res) => {
+  const { taskId } = req.params;
 
-	const { taskId } = req.params;
+  const userTask = await TaskModel.findOne({ _id: taskId }).lean();
 
-	const userTask = await TaskModel.findOne({ _id: taskId }).lean();
+  if (!userTask) throw new Error("Task not exist");
 
-	if (!userTask) throw new Error("Task not exist");
+  const updateTaskData = {
+    title: req.body.title,
+    description: req.body.description,
+    dueDate: req.body.dueDate,
+    status: req.body.status,
+  };
 
-	const updateTaskData = {
-		title: req.body.title,
-		description: req.body.description,
-		dueDate: req.body.dueDate,
-		status: req.body.status
-	}
+  await TaskModel.findOneAndUpdate({ _id: taskId }, updateTaskData).lean();
 
-	await TaskModel.findOneAndUpdate({ _id: taskId }, updateTaskData).lean();
-
-	return { data: "Updated successfully" };
-}
+  return { data: "Updated successfully" };
+};
 
 const deleteTask = async (req, res) => {
+  const { taskId } = req.params;
 
-	const { taskId } = req.params;
+  const userTask = await TaskModel.findOne({ _id: taskId }).lean();
 
-	const userTask = await TaskModel.findOne({ _id: taskId, }).lean();
+  if (!userTask) throw new Error("Task not exist");
 
-	if (!userTask) throw new Error("Task not exist")
+  await TaskModel.findOneAndDelete({ _id: taskId }).lean();
 
-	await TaskModel.findOneAndDelete({ _id: taskId }).lean();
-
-	return { data: "Deleted successfully" };
-}
+  return { data: "Deleted successfully" };
+};
 
 module.exports = {
-	createTask,
-	getTaskList,
-	updateTask,
-	getTaskById,
-	deleteTask
-}
+  createTask,
+  getTaskList,
+  updateTask,
+  getTaskById,
+  deleteTask,
+};
