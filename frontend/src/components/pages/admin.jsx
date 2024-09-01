@@ -162,7 +162,8 @@ const UserList = () => {
           {tasks.length !== 0 ? (
             tasks.map((task) => (
               <div key={task._id} className="mb-3">
-                <div className="mb-3">
+                <div className="mb-3 d-flex">
+                  <div className="me-3">Title:</div>
                   {editingTask && editingTask._id === task._id ? (
                     <Form.Control
                       type="text"
@@ -178,7 +179,8 @@ const UserList = () => {
                     <div>{task.title}</div>
                   )}
                 </div>
-                <div className="mb-3">
+                <div className="mb-3 d-flex">
+                  <div className="me-3">Description:</div>
                   {editingTask && editingTask._id === task._id ? (
                     <Form.Control
                       as="textarea"
@@ -194,7 +196,8 @@ const UserList = () => {
                     <div>{task.description}</div>
                   )}
                 </div>
-                <div className="mb-3">
+                <div className="mb-3 d-flex">
+                  <div className="me-3">Status:</div>
                   {editingTask && editingTask._id === task._id ? (
                     <Form.Control
                       as="select"
