@@ -1,8 +1,11 @@
 const TaskModel = require("./model");
 
 const createTask = async (req) => {
+  const user = req.user;
+
   const taskData = {
     title: req.body.title,
+    userId: user.role === "ADMIN" ? req.body.userId : user.id,
     description: req.body.description,
     dueDate: req.body.dueDate,
     status: "PENDING",
@@ -14,15 +17,24 @@ const createTask = async (req) => {
 };
 
 const getTaskList = async (req) => {
-  const userTasks = await TaskModel.find({}).lean();
+
+  const user = req.user;
+
+  const userId = user.role === "ADMIN" ? req.query.userId : user.id;
+
+  const userTasks = await TaskModel.find({ userId }).lean();
 
   return { message: "success", data: userTasks };
 };
 
 const getTaskById = async (req) => {
+  const user = req.user;
+
   const { taskId } = req.params;
 
-  const userTask = await TaskModel.find({ _id: taskId }).lean();
+  const userId = user.role === "ADMIN" ? undefined : user.id;
+
+  const userTask = await TaskModel.findOne({ _id: taskId ,userId }).lean();
 
   if (!userTask) throw new Error("Task not exist");
 
@@ -30,11 +42,15 @@ const getTaskById = async (req) => {
 };
 
 const updateTask = async (req, res) => {
+  const user = req.user;
+
   const { taskId } = req.params;
 
   const userTask = await TaskModel.findOne({ _id: taskId }).lean();
 
   if (!userTask) throw new Error("Task not exist");
+
+  if(user.role !== "ADMIN" && userTask.userId?.toString() !== user.id)  throw new Error("You can't edit this task");
 
   const updateTaskData = {
     title: req.body.title,
@@ -49,11 +65,15 @@ const updateTask = async (req, res) => {
 };
 
 const deleteTask = async (req, res) => {
+  const user = req.user;
+
   const { taskId } = req.params;
 
   const userTask = await TaskModel.findOne({ _id: taskId }).lean();
 
   if (!userTask) throw new Error("Task not exist");
+
+  if(user.role !== "ADMIN" && userTask.userId?.toString() !== user.id)  throw new Error("You can't delete this task");
 
   await TaskModel.findOneAndDelete({ _id: taskId }).lean();
 

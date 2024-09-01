@@ -10,6 +10,11 @@ const TaskModel = mongoose.model(
         maxlength: 255,
         required: true,
       },
+      userId:{
+        type:mongoose.Types.ObjectId,
+        required: true,
+        ref:"User"
+      },
       description: {
         type: String,
         required: true,

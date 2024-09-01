@@ -5,7 +5,7 @@ const { authorizeRoute, isAdminUser } = require("../Authorize/authorize");
 const router = express.Router();
 
 
-router.post('/', [authorizeRoute, isAdminUser, createTaskInputValidation], async (req, res, next) => {
+router.post('/', [authorizeRoute, createTaskInputValidation], async (req, res, next) => {
 	try {
 		const result = await taskService.createTask(req, res)
 		return res.status(201).send(result)
