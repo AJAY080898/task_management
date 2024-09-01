@@ -22,8 +22,6 @@ function TaskDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [isAdmin, setIsAdmin] = useState(false);
-
   const task = useSelector((state) => {
     return state.tasks.items.find((t) => t._id == id);
   });
@@ -33,14 +31,6 @@ function TaskDetails() {
   useEffect(() => {
     if (!task) {
       navigate("/");
-    }
-
-    const token = localStorage.getItem("token");
-    if (token) {
-      const decodedToken = parseJwt(token);
-      if (decodedToken.role?.toLowerCase() === "admin") {
-        setIsAdmin(true);
-      }
     }
   }, []);
 
@@ -76,19 +66,11 @@ function TaskDetails() {
           <Form>
             <BootstrapForm.Group>
               <BootstrapForm.Label>Title</BootstrapForm.Label>
-              {isAdmin ? (
-                <Field
-                  name="title"
-                  as={BootstrapForm.Control}
-                  isInvalid={touched.title && errors.title}
-                />
-              ) : (
-                <BootstrapForm.Control
-                  plaintext
-                  readOnly
-                  defaultValue={task.title}
-                />
-              )}
+              <Field
+                name="title"
+                as={BootstrapForm.Control}
+                isInvalid={touched.title && errors.title}
+              />
               <BootstrapForm.Control.Feedback type="invalid">
                 {errors.title}
               </BootstrapForm.Control.Feedback>
@@ -96,21 +78,12 @@ function TaskDetails() {
 
             <BootstrapForm.Group>
               <BootstrapForm.Label>Description</BootstrapForm.Label>
-              {isAdmin ? (
-                <Field
-                  name="description"
-                  as={BootstrapForm.Control}
-                  isInvalid={touched.description && errors.description}
-                />
-              ) : (
-                <BootstrapForm.Control
-                  plaintext
-                  readOnly
-                  defaultValue={task.description}
-                />
-              )}
+              <Field
+                name="description"
+                as={BootstrapForm.Control}
+                isInvalid={touched.description && errors.description}
+              />
             </BootstrapForm.Group>
-
             <BootstrapForm.Group>
               <BootstrapForm.Label>Status</BootstrapForm.Label>
               <Field name="status" as="select" className="form-control">

@@ -34,12 +34,8 @@ const Layout = (props) => {
             <Container>
               <Navbar.Brand href="/">Task Manager</Navbar.Brand>
               <Nav className="mr-auto d-flex gap-2">
-                {isAdmin && (
-                  <>
-                    <Link to="/new">Add Task</Link>
-                    <Link to="/admin">Manage Users</Link>
-                  </>
-                )}
+                <Link to="/new">Add Task</Link>
+                {isAdmin && <Link to="/admin">Manage Users</Link>}
               </Nav>
               <SearchBar />
             </Container>

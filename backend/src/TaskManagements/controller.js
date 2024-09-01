@@ -46,7 +46,7 @@ router.put('/:taskId', [authorizeRoute, updateTaskInputValidation], async (req, 
 
 });
 
-router.delete('/:taskId', [authorizeRoute,isAdminUser], async (req, res, next) => {
+router.delete('/:taskId', [authorizeRoute], async (req, res, next) => {
 	try {
 		const result = await taskService.deleteTask(req);
 		return res.status(200).send(result)

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { parseJwt } from "../utils/helper";
 
 const api = () => {
   return axios.create({
@@ -11,11 +12,13 @@ const api = () => {
   });
 };
 
+const userId = () => parseJwt(localStorage.getItem("token")).id;
+
 export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
   let tasks;
   try {
     await new Promise((resolve) => setTimeout(resolve, 500));
-    const response = await api().get("/task");
+    const response = await api().get("/task", { params: { userId: userId() } });
     tasks = response.data.data;
   } catch (error) {
     console.error("Error fetching tasks", error);
@@ -25,7 +28,7 @@ export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
 });
 
 export const addTask = createAsyncThunk("tasks/addTask", async (task) => {
-  const response = await api().post("/task", task);
+  const response = await api().post("/task", { ...task, userId: userId() });
   return response.data;
 });
 

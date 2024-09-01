@@ -17,16 +17,11 @@ function TaskList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const filterQuery = useSelector((state) => state.tasks.query) || "";
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       dispatch(fetchTasks());
-      const decodedToken = parseJwt(token);
-      if (decodedToken.role?.toLowerCase() === "admin") {
-        setIsAdmin(true);
-      }
     } else {
       navigate("/signin");
     }
@@ -80,11 +75,9 @@ function TaskList() {
       <Layout>
         <Container>
           No tasks found &nbsp;
-          {isAdmin && (
-            <Link to="/new" className="link-primary">
-              Add Task
-            </Link>
-          )}
+          <Link to="/new" className="link-primary">
+            Add Task
+          </Link>
         </Container>
       </Layout>
     );
@@ -127,14 +120,12 @@ function TaskList() {
                     <Link to={"/task/" + task._id} className="btn btn-primary">
                       Edit
                     </Link>
-                    {isAdmin && (
-                      <Button
-                        onClick={() => handleDelete(task._id)}
-                        className="btn btn-danger"
-                      >
-                        Delete
-                      </Button>
-                    )}
+                    <Button
+                      onClick={() => handleDelete(task._id)}
+                      className="btn btn-danger"
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </div>
               </ListGroup.Item>

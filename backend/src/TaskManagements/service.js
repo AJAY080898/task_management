@@ -20,6 +20,8 @@ const getTaskList = async (req) => {
 
   const user = req.user;
 
+  if(user.role === "ADMIN" && !req.query.userId) throw new Error("User id required in query")
+
   const userId = user.role === "ADMIN" ? req.query.userId : user.id;
 
   const userTasks = await TaskModel.find({ userId }).lean();

@@ -54,12 +54,6 @@ const TaskForm = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/signin");
-    } else {
-      const decodedToken = parseJwt(token);
-
-      if (decodedToken.role?.toLowerCase() !== "admin") {
-        navigate("/");
-      }
     }
   }, []);
 
